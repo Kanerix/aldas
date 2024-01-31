@@ -18,9 +18,9 @@
 trait UnionFind {
     /// The element that is used by the set.
     ///
-    /// Each entry in the set is of this type.
+    /// Each entry in the set, is of this type.
     type Element;
-    /// Returns a new set with elements from 0 up to `n` ({0..n}).
+    /// Returns a new set with elements from 0 up to `n` (`{0..n}`).
     ///
     /// No elements are connected, when the set is first created.
     /// Use the [`UnionFind::union`] method to combine two sets.
@@ -55,7 +55,7 @@ struct Node {
     value: usize,
     /// An optional pointer to the elements parent.
     ///
-    /// A [`Box`] pointer to the parent provided in the [`Some`] variant.
+    /// A [`Box`] pointer to the parent provided in the [`Some(Box>Node>)`] variant.
     /// If the element does not have a parent, it is [`None`].
     parent: Option<Box<Node>>,
 }
@@ -111,7 +111,44 @@ impl UnionFind for QuickFind {
 
 /// Represents a quick union structure.
 struct QuickUnion {
-    vec: Vec<Node>,
+    elements: Vec<Node>,
+}
+
+impl UnionFind for QuickUnion {
+    type Element = Node;
+
+    fn new(n: usize) -> Self {
+        let mut elements = Vec::with_capacity(n);
+
+        for i in 0..elements.len() {
+            elements.push(Node {
+                value: i,
+                parent: None,
+            });
+        }
+
+        QuickUnion { elements }
+    }
+
+    fn union(&mut self, p: usize, q: usize) {
+        todo!()
+    }
+
+    fn find(&self, p: usize) -> Option<&Self::Element> {
+        let mut root = &self.elements.get(p)?.parent;
+        while let Some(element) = root {
+            root = &element.parent;
+        }
+        return root.as_deref();
+    }
+
+    fn connected(&self, p: usize, q: usize) -> Option<bool> {
+        todo!()
+    }
+
+    fn count(&self) -> usize {
+        todo!()
+    }
 }
 
 /// Represents a weighted quick union structure.
