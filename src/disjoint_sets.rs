@@ -34,12 +34,12 @@ trait UnionFind {
     /// Finds the root element of `p`.
     ///
     /// Returns [`None`] if `p` is not a part of the set.
-    fn find(&self, p: usize) -> Option<&Self::Element>;
+    fn find(&self, p: usize) -> &Self::Element;
     /// Checks if `p` is a part of `q`.
     ///
     /// Returns [`None`] if `p` or `q` is not a part of the entire set.
     /// Returns `true` if `q` and `p` is connected, otherwise `false`.
-    fn connected(&self, p: usize, q: usize) -> Option<bool>;
+    fn connected(&self, p: usize, q: usize) -> bool;
     /// Returns a count of the amount of elements in the set.
     ///
     /// The time complexity of this function is always `O(n)`.
@@ -93,15 +93,22 @@ impl UnionFind for QuickFind {
     }
 
     fn union(&mut self, p: usize, q: usize) {
-        todo!()
+        if self.connected(p, q) {
+            return;
+        }
+
+        let parent = self.parents.get(p);
+        if let None = parent {
+            return;
+        }
     }
 
-    fn find(&self, p: usize) -> Option<&Self::Element> {
-        self.elements.get(p)
+    fn find(&self, p: usize) -> &Self::Element {
+        self.elements.get(p).unwrap()
     }
 
-    fn connected(&self, p: usize, q: usize) -> Option<bool> {
-        todo!()
+    fn connected(&self, p: usize, q: usize) -> bool {
+        self.elements.get(p).unwrap() == self.elements.get(q).unwrap()
     }
 
     fn count(&self) -> usize {
@@ -134,15 +141,15 @@ impl UnionFind for QuickUnion {
         todo!()
     }
 
-    fn find(&self, p: usize) -> Option<&Self::Element> {
-        let mut root = &self.elements.get(p)?.parent;
+    fn find(&self, p: usize) -> &Self::Element {
+        let mut root = &self.elements.get(p).unwrap().parent;
         while let Some(element) = root {
             root = &element.parent;
         }
-        return root.as_deref();
+        root.parent
     }
 
-    fn connected(&self, p: usize, q: usize) -> Option<bool> {
+    fn connected(&self, p: usize, q: usize) -> bool {
         todo!()
     }
 
