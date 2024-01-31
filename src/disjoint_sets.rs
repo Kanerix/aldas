@@ -1,3 +1,7 @@
+//! # Theory
+//!
+//! # Table
+//!
 //! | Algorithm              | Construction | Union  | Find  |
 //! | ---------------------- | ------------ | ------ | ----- |
 //! | [`QuickFind`]          | N            | N      | 1     |
@@ -11,11 +15,13 @@
 /// A trait containing methods to create an union find for a set.
 ///
 /// A list of elements connected is called an component.
-trait UnionFind {
-    type Element;
-    /// Returns a new set with elements from 0 up to `n`.
+trait UnionFind<T>
+where
+    T: PartialEq,
+{
+    /// Returns a new set with elements from 0 up to `n` ({0..n}).
     ///
-    /// No elements are connected when the set is first created.
+    /// No elements are connected, when the set is first created.
     /// Use the [`UnionFind::union`] method to combine two sets.
     ///
     /// The time complexity of this function is always `O(N)`.
@@ -23,26 +29,23 @@ trait UnionFind {
     /// Connects two sets to each other.
     ///
     /// If `p` is a part of `q`'s set, this does nothing.
-    /// TODO: Math equ
     fn union(&mut self, p: usize, q: usize);
-    /// Finds a element within the entire set.
+    /// Finds the root element of `p`.
     ///
     /// Returns [`None`] if `p` is not a part of the set.
-    /// TODO: Math equ
-    fn find(&self, p: usize) -> Option<&Element>;
+    fn find(&self, p: usize) -> Option<&T>;
     /// Checks if `p` is a part of `q`.
     ///
-    /// Returns [`None`] if `p` or `q` is not a part of the set.
+    /// Returns [`None`] if `p` or `q` is not a part of the entire set.
     /// Returns `true` if `q` and `p` is connected, otherwise `false`.
-    /// TODO: Math equ
-    fn connected(p: usize, q: usize) -> Option<bool>;
+    fn connected(&self, p: usize, q: usize) -> Option<bool>;
     /// Returns a count of the amount of elements in the set.
     ///
     /// The time complexity of this function is always `O(n)`.
-    fn count() -> usize;
+    fn count(&self) -> usize;
 }
 
-/// A simple element containing its value, and a pointer to its parent.
+/// A simple element containing a value, and a pointer to its parent.
 ///
 /// If the [`Element`] has no parent, it is [`None`].
 /// This structure is used for performing a quick union.
@@ -56,6 +59,13 @@ struct Element {
     parent: Option<Box<Element>>,
 }
 
+impl PartialEq for Element {
+    /// Two elements are equal, if their `value` field is the same.
+    fn eq(&self, other: &Self) -> bool {
+        self.value == other.value
+    }
+}
+
 /// Represents a quick find structure.
 ///
 /// A naive implementation of a union find.
@@ -67,27 +77,35 @@ struct QuickFind {
     parents: Vec<usize>,
 }
 
-impl UnionFind for QuickFind {
-    type Element = usize;
-
+impl<T> UnionFind<T> for QuickFind
+where
+    T: PartialEq,
+{
     fn new(n: usize) -> Self {
-        todo!()
+        let mut elements = Vec::with_capacity(n);
+        let parents = Vec::with_capacity(n);
+
+        for i in 0..elements.len() {
+            elements.push(i);
+        }
+
+        QuickFind { elements, parents }
     }
 
     fn union(&mut self, p: usize, q: usize) {
         todo!()
     }
 
-    fn find(&self, p: usize) -> Option<&Element> {
+    fn find(&self, p: usize) -> Option<&T> {
         todo!() // self.elements.get(p)
     }
 
-    fn connected(p: usize, q: usize) -> Option<bool> {
+    fn connected(&self, p: usize, q: usize) -> Option<bool> {
         todo!()
     }
 
-    fn count() -> usize {
-        todo!()
+    fn count(&self) -> usize {
+        return self.elements.len();
     }
 }
 
@@ -105,9 +123,10 @@ struct WeightedQuickUnion {
     elements: Vec<Element>,
 }
 
-impl UnionFind for WeightedQuickUnion {
-    type Element = Element;
-
+impl<T> UnionFind<T> for WeightedQuickUnion
+where
+    T: PartialEq,
+{
     fn new(n: usize) -> Self {
         let mut elements = Vec::with_capacity(n);
 
@@ -125,16 +144,28 @@ impl UnionFind for WeightedQuickUnion {
         todo!()
     }
 
-    fn find(&self, p: usize) -> Option<&Element> {
-        self.elements.get(p)
+    fn find(&self, p: usize) -> Option<&T> {
+        let mut root = self.elements.get(p)?.parent;
+        while let Some(element) = root {
+            root = element.parent;
+        }
+        return root.as_deref();
     }
 
-    fn connected(p: usize, q: usize) -> Option<bool> {
-        todo!()
+    fn connected(&self, p: usize, q: usize) -> Option<bool> {
+        let p_root = self.find(p);
+        let q_root = self.find(q);
+
+        match (p_root, q_root) {
+            (Some(p_root), Some(q_root)) => {
+                return Some(p_root == q_root);
+            }
+            _ => return None,
+        }
     }
 
-    fn count() -> usize {
-        todo!()
+    fn count(&self) -> usize {
+        return self.elements.len();
     }
 }
 
