@@ -15,10 +15,11 @@
 /// A trait containing methods to create an union find for a set.
 ///
 /// A list of elements connected is called an component.
-trait UnionFind<T>
-where
-    T: PartialEq,
-{
+trait UnionFind {
+    /// The element that is used by the set.
+    ///
+    /// Each entry in the set is of this type.
+    type Element;
     /// Returns a new set with elements from 0 up to `n` ({0..n}).
     ///
     /// No elements are connected, when the set is first created.
@@ -33,7 +34,7 @@ where
     /// Finds the root element of `p`.
     ///
     /// Returns [`None`] if `p` is not a part of the set.
-    fn find(&self, p: usize) -> Option<&T>;
+    fn find(&self, p: usize) -> Option<&Self::Element>;
     /// Checks if `p` is a part of `q`.
     ///
     /// Returns [`None`] if `p` or `q` is not a part of the entire set.
@@ -49,17 +50,17 @@ where
 ///
 /// If the [`Element`] has no parent, it is [`None`].
 /// This structure is used for performing a quick union.
-struct Element {
+struct Node {
     /// The value of the element in the set.
     value: usize,
     /// An optional pointer to the elements parent.
     ///
     /// A [`Box`] pointer to the parent provided in the [`Some`] variant.
     /// If the element does not have a parent, it is [`None`].
-    parent: Option<Box<Element>>,
+    parent: Option<Box<Node>>,
 }
 
-impl PartialEq for Element {
+impl PartialEq for Node {
     /// Two elements are equal, if their `value` field is the same.
     fn eq(&self, other: &Self) -> bool {
         self.value == other.value
@@ -77,10 +78,9 @@ struct QuickFind {
     parents: Vec<usize>,
 }
 
-impl<T> UnionFind<T> for QuickFind
-where
-    T: PartialEq,
-{
+impl UnionFind for QuickFind {
+    type Element = usize;
+
     fn new(n: usize) -> Self {
         let mut elements = Vec::with_capacity(n);
         let parents = Vec::with_capacity(n);
@@ -96,8 +96,8 @@ where
         todo!()
     }
 
-    fn find(&self, p: usize) -> Option<&T> {
-        todo!() // self.elements.get(p)
+    fn find(&self, p: usize) -> Option<&Self::Element> {
+        self.elements.get(p)
     }
 
     fn connected(&self, p: usize, q: usize) -> Option<bool> {
@@ -111,7 +111,7 @@ where
 
 /// Represents a quick union structure.
 struct QuickUnion {
-    vec: Vec<Element>,
+    vec: Vec<Node>,
 }
 
 /// Represents a weighted quick union structure.
@@ -120,18 +120,17 @@ struct QuickUnion {
 /// When doing a union of two components, we make sure that the smaller
 /// components is added to the bigger one.
 struct WeightedQuickUnion {
-    elements: Vec<Element>,
+    elements: Vec<Node>,
 }
 
-impl<T> UnionFind<T> for WeightedQuickUnion
-where
-    T: PartialEq,
-{
+impl UnionFind for WeightedQuickUnion {
+    type Element = Node;
+
     fn new(n: usize) -> Self {
         let mut elements = Vec::with_capacity(n);
 
         for i in 0..elements.len() {
-            elements.push(Element {
+            elements.push(Node {
                 value: i,
                 parent: None,
             });
@@ -141,13 +140,16 @@ where
     }
 
     fn union(&mut self, p: usize, q: usize) {
+        if self.connected(p, q).unwrap_or(false) {
+            return;
+        }
         todo!()
     }
 
-    fn find(&self, p: usize) -> Option<&T> {
-        let mut root = self.elements.get(p)?.parent;
+    fn find(&self, p: usize) -> Option<&Self::Element> {
+        let mut root = &self.elements.get(p)?.parent;
         while let Some(element) = root {
-            root = element.parent;
+            root = &element.parent;
         }
         return root.as_deref();
     }
