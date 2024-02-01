@@ -12,6 +12,8 @@
 //! | ---------------------- | ------------ | ------ | ----- |
 //! | [`QuickFind`]          | N            | a(N)   | a(N)  |
 
+use std::ptr::NonNull;
+
 /// A trait containing methods to create an union find for a set.
 ///
 /// A list of elements connected is called an component.
@@ -34,7 +36,7 @@ trait UnionFind {
     /// Finds the root element of `p`.
     ///
     /// Returns [`None`] if `p` is not a part of the set.
-    fn find(&self, p: usize) -> &Self::Element;
+    fn find(&self, p: usize) -> &mut Self::Element;
     /// Checks if `p` is a part of `q`.
     ///
     /// Returns [`None`] if `p` or `q` is not a part of the entire set.
@@ -57,7 +59,7 @@ struct Node {
     ///
     /// A [`Box`] pointer to the parent provided in the [`Some(Box>Node>)`] variant.
     /// If the element does not have a parent, it is [`None`].
-    parent: Option<Box<Node>>,
+    parent: Option<NonNull<Node>>,
 }
 
 impl PartialEq for Node {
@@ -103,7 +105,7 @@ impl UnionFind for QuickFind {
         }
     }
 
-    fn find(&self, p: usize) -> &Self::Element {
+    fn find(&self, p: usize) -> &mut Self::Element {
         self.elements.get(p).unwrap()
     }
 
@@ -141,12 +143,12 @@ impl UnionFind for QuickUnion {
         todo!()
     }
 
-    fn find(&self, p: usize) -> &Self::Element {
-        let mut root = &self.elements.get(p).unwrap().parent;
-        while let Some(element) = root {
-            root = &element.parent;
+    fn find(&self, p: usize) -> &mut Self::Element {
+        let mut root = self.elements.get(p).unwrap();
+        while let Some(element) = root.parent {
+            root = unsafe { element.as_ref() }
         }
-        root.parent
+        root
     }
 
     fn connected(&self, p: usize, q: usize) -> bool {
@@ -184,30 +186,26 @@ impl UnionFind for WeightedQuickUnion {
     }
 
     fn union(&mut self, p: usize, q: usize) {
-        if self.connected(p, q).unwrap_or(false) {
+        if self.connected(p, q) {
             return;
         }
-        todo!()
-    }
 
-    fn find(&self, p: usize) -> Option<&Self::Element> {
-        let mut root = &self.elements.get(p)?.parent;
-        while let Some(element) = root {
-            root = &element.parent;
-        }
-        return root.as_deref();
-    }
-
-    fn connected(&self, p: usize, q: usize) -> Option<bool> {
-        let p_root = self.find(p);
+        let mut p_root = self.find(p);
         let q_root = self.find(q);
 
-        match (p_root, q_root) {
-            (Some(p_root), Some(q_root)) => {
-                return Some(p_root == q_root);
-            }
-            _ => return None,
+        p_root.parent = Some(NonNull::from(q_root));
+    }
+
+    fn find(&self, p: usize) -> &mut Self::Element {
+        let mut root = self.elements.get_mut(p).unwrap();
+        while let Some(element) = root.parent {
+            root = unsafe { element.as_ref() }
         }
+        return root;
+    }
+
+    fn connected(&self, p: usize, q: usize) -> bool {
+        self.find(p) == self.find(q)
     }
 
     fn count(&self) -> usize {
