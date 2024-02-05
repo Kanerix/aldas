@@ -3,4 +3,4 @@
 #![allow(unused_variables)]
 #![allow(unreachable_code)]
 
-mod disjoint_sets;
+pub mod disjoint_set;
