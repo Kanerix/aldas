@@ -1,16 +1,16 @@
 n = input()
-coffee_machines = input()
+cof_machines = input()
 
-coffees = 0
-lectures = 0
+cof = 0
+lec = 0
 
-for machine in coffee_machines: 
-    if machine == "0" and coffees > 0:
-        coffees -= 1
-        lectures += 1
+for machine in cof_machines: 
+    if machine == "0" and cof > 0:
+        cof -= 1
+        lec += 1
 
     if machine == "1":
-        coffees = 2
-        lectures += 1
+        cof = 2
+        lec += 1
 
-print(lectures)
+print(lec)
