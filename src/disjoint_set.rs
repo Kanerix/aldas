@@ -61,11 +61,35 @@ pub struct WeightedQuickUnion {
 
 impl UnionFind for QuickFind {
     fn new(n: usize) -> Self {
-        todo!()
+        let mut elements = Vec::with_capacity(n);
+        let mut parents = Vec::with_capacity(n);
+
+        for i in 0..n {
+            elements.push(i);
+            parents.push(i);
+        }
+
+        QuickFind { elements, parents }
     }
 
     fn extend(&mut self, n: usize) {
-        todo!()
+        let count = self.count();
+        let max = if count != 0 {
+            self.elements[count - 1]
+        } else {
+            0
+        };
+
+        let mut new_elements = Vec::with_capacity(n);
+        let mut new_parents = Vec::with_capacity(n);
+
+        for i in max..max + n {
+            new_elements.push(i);
+            new_parents.push(i);
+        }
+
+        self.elements.extend(new_elements);
+        self.parents.extend(new_parents);
     }
 
     fn union(&mut self, p: usize, q: usize) {
@@ -77,7 +101,7 @@ impl UnionFind for QuickFind {
     }
 
     fn connected(&self, p: usize, q: usize) -> bool {
-        todo!()
+        self.find(p) == self.find(q)
     }
 
     fn move_to(&mut self, p: usize, q: usize) {
@@ -150,25 +174,18 @@ impl UnionFind for QuickUnion {
     }
 
     fn move_to(&mut self, p: usize, q: usize) {
-        let p_root = self.find(p);
-        let q_root = self.find(q);
+        if self.connected(p, q) {
+            return;
+        }
 
-        self.parents[p] = q_root;
-
-        let mut new_parent = p_root;
+        let mut new_parent = self.find(p);
+        self.parents[p] = q;
 
         for element in 0..self.count() {
-            if element == p {
-                continue;
-            }
-
-            let parent = self.parents[element];
-
-            if parent == p {
+            if self.parents[element] == p {
                 if new_parent == p {
                     new_parent = element
                 }
-
                 self.parents[element] = new_parent;
             }
         }
@@ -201,7 +218,9 @@ impl UnionFind for WeightedQuickUnion {
     }
 
     fn move_to(&mut self, p: usize, q: usize) {
-        todo!()
+        // I am not clever enough to figure out how to
+        // move an element and not fuck up its rank.
+        unimplemented!()
     }
 
     fn count(&self) -> usize {
