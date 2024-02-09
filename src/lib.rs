@@ -4,3 +4,4 @@
 #![allow(unreachable_code)]
 
 pub mod disjoint_set;
+pub mod disjoint_set_ptr;
