@@ -232,17 +232,17 @@ impl UnionFind for WeightedQuickUnion {
 mod tests {
     use super::*;
 
-    const IN_1: &str = include_str!("data/disjoint_sets/1.in");
-    const ANS_1: &str = include_str!("data/disjoint_sets/1.ans");
+    const IN_1: &str = include_str!("samples/disjoint_sets/1.in");
+    const ANS_1: &str = include_str!("samples/disjoint_sets/1.ans");
 
-    const IN_2: &str = include_str!("data/disjoint_sets/2.in");
-    const ANS_2: &str = include_str!("data/disjoint_sets/2.ans");
+    const IN_2: &str = include_str!("samples/disjoint_sets/2.in");
+    const ANS_2: &str = include_str!("samples/disjoint_sets/2.ans");
 
-    const IN_3: &str = include_str!("data/disjoint_sets/3.in");
-    const ANS_3: &str = include_str!("data/disjoint_sets/3.ans");
+    const IN_3: &str = include_str!("samples/disjoint_sets/3.in");
+    const ANS_3: &str = include_str!("samples/disjoint_sets/3.ans");
 
-    const IN_4: &str = include_str!("data/disjoint_sets/4.in");
-    const ANS_4: &str = include_str!("data/disjoint_sets/4.ans");
+    const IN_4: &str = include_str!("samples/disjoint_sets/4.in");
+    const ANS_4: &str = include_str!("samples/disjoint_sets/4.ans");
 
     #[test]
     fn test_quick_find() {
