@@ -17,6 +17,8 @@
 //!
 //! # Benchmarks
 //!
+//! Hyperfine benchmark results.
+//!
 //! Benchmark 1: cargo test dset::tests::test_qf
 //!  Time (mean ± σ):      4.615 s ±  0.229 s    [User: 4.534 s, System: 0.028 s]
 //!  Range (min … max):    4.536 s …  5.267 s    10 runs
