@@ -2,8 +2,8 @@ use std::ptr::NonNull;
 
 /// A disjoined-set data structure.
 #[derive(Debug)]
-struct DisjoinedSet {
-    nodes: Vec<Node>,
+struct DSetPtr {
+    nodes: Vec<Box<Node>>,
     len: usize,
 }
 
@@ -24,12 +24,12 @@ impl Node {
     ///
     /// The node is boxed because we need to make sure,
     /// that the node is never moved to another place in memory.
-    fn new(element: usize) -> Self {
-        Node {
+    fn new(element: usize) -> Box<Self> {
+        Box::new(Node {
             element,
             parent: None,
             rank: 0,
-        }
+        })
     }
 
     /// Returns the element held by the [`Node`].
@@ -44,7 +44,7 @@ impl PartialEq for Node {
     }
 }
 
-impl DisjoinedSet {
+impl DSetPtr {
     /// Construct a new disjoined set with elements from {0..`n`-1}.
     ///
     /// This uses [`Node::new`] to add elements, and therefor
@@ -61,7 +61,7 @@ impl DisjoinedSet {
             elements.push(Node::new(i));
         }
 
-        DisjoinedSet {
+        DSetPtr {
             nodes: elements,
             len: n,
         }
@@ -93,39 +93,26 @@ impl DisjoinedSet {
         self.len += n;
     }
 
-    /// Gets the root node of `p`'s disjoined set.
+    /// Gets the leader node of `p`'s disjoined set.
+    ///
+    /// The leader node will always be the only node that has no parent
+    /// (the parent is [`None`]).
     ///
     /// This has the time complexity O(depth), where depth is how deep the
     /// [`Node`] is in the individual disjoined set tree, because we have to go
     /// through the parent of all elements until we hit an [`Node`] without a parent
     /// (this is the root node).
-    fn get_root(&self, p: usize) -> Option<&Node> {
-        let mut node = self.nodes.get(p)?;
+    fn get_leader(&self, p: usize) -> Option<Box<Node>> {
+        let mut node = *self.nodes.get(p)?;
         while let Some(parent) = node.parent {
-            // SAFETY: Each node is constructed using a box.
-            node = unsafe { parent.as_ref() };
-        }
-        Some(node)
-    }
-
-    /// Gets the root node of `p`'s disjoined set.
-    ///
-    /// This has the time complexity O(depth), where depth is how deep the
-    /// [`Node`] is in the individual disjoined set tree, because we have to go
-    /// through the parent of all elements until we hit an [`Node`] without a parent
-    /// (this is the root node).
-    fn get_root_mut(&mut self, p: usize) -> Option<&mut Node> {
-        let mut node = self.nodes.get_mut(p)?;
-        while let Some(mut parent) = node.parent {
-            // SAFETY: Each node is constructed using a box.
-            node = unsafe { parent.as_mut() };
+            node = unsafe { Box::from_raw(parent.as_ptr()) };
         }
         Some(node)
     }
 
     /// Returns if two elements is in the same individual set.
     fn connected(&self, p: usize, q: usize) -> Option<bool> {
-        Some(self.get_root(p)?.element == self.get_root(q)?.element)
+        Some(self.get_leader(p)?.element == self.get_leader(q)?.element)
     }
 
     /// Creates a union of two sets.
@@ -139,14 +126,13 @@ impl DisjoinedSet {
             return Some(false);
         }
 
-        let p_root_raw: *mut _ = self.get_root_mut(p)?;
-        let q_root_raw: *mut _ = self.get_root_mut(q)?;
+        let mut p_root_box = self.get_leader(p)?;
+        let q_root_box = self.get_leader(q)?;
 
-        let mut p_root_ptr = unsafe { NonNull::new_unchecked(p_root_raw) };
-        let q_root_ptr = unsafe { NonNull::new_unchecked(q_root_raw) };
+        let p_root: *mut _ = p_root_box.as_mut();
+        let q_root = q_root_box.as_ref();
 
-        let p_root: &mut Node = unsafe { p_root_ptr.as_mut() };
-        p_root.parent = Some(q_root_ptr);
+        unsafe { (*p_root).parent = Some(NonNull::from(q_root)) };
 
         Some(true)
     }
@@ -158,8 +144,8 @@ impl DisjoinedSet {
 
         let mut parent_for_children = self.get_root(p)?;
 
-        let q_root_raw: *mut _ = self.get_root_mut(q)?;
-        let p_node_raw: *mut _ = self.nodes.get_mut(p)?;
+        let q_root = self.get_root(q)?.as_mut();
+        let p_node = self.nodes.get(p)?.as_mut();
 
         let p_node_ptr = unsafe { NonNull::new_unchecked(q_root_raw) };
         let p_node: &Node = unsafe { p_node_ptr.as_ref() };
@@ -188,8 +174,8 @@ impl DisjoinedSet {
 mod tests {
     use super::*;
 
-    const INPUT: &str = include_str!("samples/disjoint_sets/1.in");
-    const OUTPUT: &str = include_str!("samples/disjoint_sets/1.ans");
+    const INPUT: &str = include_str!("samples/1.in");
+    const OUTPUT: &str = include_str!("samples/1.ans");
 
     #[test]
     fn test_union_find() {
@@ -200,7 +186,7 @@ mod tests {
         let n: usize = first_line[0].parse().unwrap();
         let m: usize = first_line[1].parse().unwrap();
 
-        let mut d_set = DisjoinedSet::new(n);
+        let mut d_set = DSetPtr::new(n);
 
         let mut output = String::new();
 
