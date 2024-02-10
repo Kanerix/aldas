@@ -69,7 +69,7 @@ impl UnionFind for QuickFind {
         }
 
         let mut new_parent = self.find_leader(p);
-        self.parents[p] = q;
+        self.parents[p] = self.find_leader(q);
 
         for element in 0..self.count() {
             if self.parents[element] == p {
