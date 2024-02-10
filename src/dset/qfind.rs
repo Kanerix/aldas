@@ -64,7 +64,21 @@ impl UnionFind for QuickFind {
     }
 
     fn move_to(&mut self, p: usize, q: usize) {
-        todo!()
+        if self.connected(p, q) {
+            return;
+        }
+
+        let mut new_parent = self.find_leader(p);
+        self.parents[p] = q;
+
+        for element in 0..self.count() {
+            if self.parents[element] == p {
+                if new_parent == p {
+                    new_parent = element
+                }
+                self.parents[element] = new_parent;
+            }
+        }
     }
 
     fn count(&self) -> usize {

@@ -69,7 +69,6 @@ mod tests {
 
     #[test]
     fn test_quick_find() {
-        // TODO: Implement
         let mut qf = QuickFind::new(0);
         union_find(&mut qf);
     }
@@ -88,7 +87,7 @@ mod tests {
     }
 
     fn union_find(union_find: &mut impl UnionFind) {
-        let mut lines = IN_1.lines();
+        let mut lines = IN_4.lines();
         let first_line = lines.next().unwrap().split(' ').collect::<Vec<&str>>();
         let n: usize = first_line[0].parse().unwrap();
         let m: usize = first_line[1].parse().unwrap();
@@ -117,6 +116,6 @@ mod tests {
             }
         }
 
-        assert_eq!(output.trim_end(), ANS_1)
+        assert_eq!(output.trim_end(), ANS_4)
     }
 }
