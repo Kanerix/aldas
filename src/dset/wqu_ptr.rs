@@ -103,16 +103,16 @@ impl DSetPtr {
     /// through the parent of all elements until we hit an [`Node`] without a parent
     /// (this is the root node).
     fn get_leader(&self, p: usize) -> Option<Box<Node>> {
-        let mut node = *self.nodes.get(p)?;
+        let mut node = self.nodes.get(p)?;
         while let Some(parent) = node.parent {
-            node = unsafe { Box::from_raw(parent.as_ptr()) };
+            node = unsafe { &Box::from_raw(parent.as_ptr()) };
         }
         Some(node)
     }
 
     /// Returns if two elements is in the same individual set.
     fn connected(&self, p: usize, q: usize) -> Option<bool> {
-        Some(self.get_leader(p)?.element == self.get_leader(q)?.element)
+        Some(self.get_leader(p)? == self.get_leader(q)?)
     }
 
     /// Creates a union of two sets.

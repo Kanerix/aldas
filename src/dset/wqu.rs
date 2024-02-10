@@ -60,7 +60,7 @@ impl UnionFind for WeightedQuickUnion {
             return;
         }
 
-        if self.ranks[q_leader] < self.ranks[p_leader] {
+        if self.ranks[q_leader] > self.ranks[p_leader] {
             self.leaders[p_leader] = q_leader;
             self.ranks[q_leader] += 1;
         } else {
