@@ -10,7 +10,7 @@ struct DSetPtr {
 /// A node in the disjoined-set.
 ///
 /// The element field holds the value of the element in the set.
-/// If the parent field is [`None`], this means that this element
+/// If the parentfield is [`None`], this means that this element
 /// is the root of that individual disjoined-set.
 #[derive(Debug)]
 struct Node {

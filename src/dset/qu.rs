@@ -3,23 +3,23 @@ use super::UnionFind;
 #[derive(Debug)]
 pub struct QuickUnion {
     elements: Vec<usize>,
-    parents: Vec<usize>,
+    leaders: Vec<usize>,
     len: usize,
 }
 
 impl UnionFind for QuickUnion {
     fn new(n: usize) -> Self {
         let mut elements = Vec::with_capacity(n);
-        let mut parents = Vec::with_capacity(n);
+        let mut leaders = Vec::with_capacity(n);
 
         for i in 0..n {
             elements.push(i);
-            parents.push(i);
+            leaders.push(i);
         }
 
         QuickUnion {
             elements,
-            parents,
+            leaders,
             len: n,
         }
     }
@@ -34,7 +34,7 @@ impl UnionFind for QuickUnion {
 
         for i in max..max + n {
             self.elements.push(i);
-            self.parents.push(i);
+            self.leaders.push(i);
         }
 
         self.len += n - 1;
@@ -42,28 +42,28 @@ impl UnionFind for QuickUnion {
 
     fn clear(&mut self) {
         self.elements = Vec::with_capacity(0);
-        self.parents = Vec::with_capacity(0);
+        self.leaders = Vec::with_capacity(0);
         self.len = 0;
     }
 
     fn union(&mut self, p: usize, q: usize) {
-        let p_root = self.find_leader(p);
-        let q_root = self.find_leader(q);
+        let p_leader = self.find_leader(p);
+        let q_leader = self.find_leader(q);
 
-        if self.connected(p_root, q_root) {
+        if self.connected(p_leader, q_leader) {
             return;
         }
 
-        self.parents[p_root] = q_root;
+        self.leaders[p_leader] = q_leader;
     }
 
     fn find_leader(&self, p: usize) -> usize {
         let mut element = self.elements[p];
-        let mut parent = self.parents[p];
+        let mut leader = self.leaders[p];
 
-        while element != parent {
-            element = parent;
-            parent = self.parents[element];
+        while element != leader {
+            element = leader;
+            leader = self.leaders[element];
         }
 
         element
@@ -78,15 +78,15 @@ impl UnionFind for QuickUnion {
             return;
         }
 
-        let mut new_parent = self.find_leader(p);
-        self.parents[p] = self.find_leader(q);
+        let mut new_leader = self.find_leader(p);
+        self.leaders[p] = self.find_leader(q);
 
         for element in 0..self.count() {
-            if self.parents[element] == p {
-                if new_parent == p {
-                    new_parent = element
+            if self.leaders[element] == p {
+                if new_leader == p {
+                    new_leader = element
                 }
-                self.parents[element] = new_parent;
+                self.leaders[element] = new_leader;
             }
         }
     }

@@ -1,31 +1,31 @@
 use super::UnionFind;
 
 /// The quick-find implementation have 2 vectores of equal size. 1 vector
-/// for the elements, and 1 that stores each elements parent. Each element
-/// in the set starts off by being its own parent. When connecting elements
+/// for the elements, and 1 that stores each elements leader. Each element
+/// in the set starts off by being its own leader. When connecting elements
 /// together, they agree on a single "leader element". This is also called the
-/// parent of the elements. All elements with the same parent, is considered a
+/// leader of an elements. All elements with the same leader, is considered a
 /// disjoined set.
 #[derive(Debug)]
 pub struct QuickFind {
     elements: Vec<usize>,
-    parents: Vec<usize>,
+    leaders: Vec<usize>,
     len: usize,
 }
 
 impl UnionFind for QuickFind {
     fn new(n: usize) -> Self {
         let mut elements = Vec::with_capacity(n);
-        let mut parents = Vec::with_capacity(n);
+        let mut leaders = Vec::with_capacity(n);
 
         for i in 0..n {
             elements.push(i);
-            parents.push(i);
+            leaders.push(i);
         }
 
         QuickFind {
             elements,
-            parents,
+            leaders,
             len: n,
         }
     }
@@ -40,7 +40,7 @@ impl UnionFind for QuickFind {
 
         for i in max..max + n {
             self.elements.push(i);
-            self.parents.push(i);
+            self.leaders.push(i);
         }
 
         self.len += n - 1;
@@ -48,25 +48,25 @@ impl UnionFind for QuickFind {
 
     fn clear(&mut self) {
         self.elements = Vec::with_capacity(0);
-        self.parents = Vec::with_capacity(0);
+        self.leaders = Vec::with_capacity(0);
         self.len = 0;
     }
 
     fn union(&mut self, p: usize, q: usize) {
-        let p_leader = self.parents[p];
-        let q_leader = self.parents[q];
+        let p_leader = self.leaders[p];
+        let q_leader = self.leaders[q];
 
         for element in self.elements.iter() {
-            let element_parent = self.parents[*element];
+            let element_leader = self.leaders[*element];
 
-            if element_parent == p_leader {
-                self.parents[*element] = q_leader
+            if element_leader == p_leader {
+                self.leaders[*element] = q_leader
             }
         }
     }
 
     fn find_leader(&self, p: usize) -> usize {
-        self.parents[p]
+        self.leaders[p]
     }
 
     fn connected(&self, p: usize, q: usize) -> bool {
@@ -78,15 +78,15 @@ impl UnionFind for QuickFind {
             return;
         }
 
-        let mut new_parent = self.find_leader(p);
-        self.parents[p] = self.find_leader(q);
+        let mut new_leader = self.find_leader(p);
+        self.leaders[p] = self.find_leader(q);
 
         for element in 0..self.count() {
-            if self.parents[element] == p {
-                if new_parent == p {
-                    new_parent = element
+            if self.leaders[element] == p {
+                if new_leader == p {
+                    new_leader = element
                 }
-                self.parents[element] = new_parent;
+                self.leaders[element] = new_leader;
             }
         }
     }
