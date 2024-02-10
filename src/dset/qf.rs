@@ -6,6 +6,7 @@ use super::UnionFind;
 /// together, they agree on a single "leader element". This is also called the
 /// parent of the elements. All elements with the same parent, is considered a
 /// disjoined set.
+#[derive(Debug)]
 pub struct QuickFind {
     elements: Vec<usize>,
     parents: Vec<usize>,
@@ -37,9 +38,18 @@ impl UnionFind for QuickFind {
             0
         };
 
-        self.elements.extend(max..max + n);
-        self.parents.extend(max..max + n);
-        self.len += n;
+        for i in max..max + n {
+            self.elements.push(i);
+            self.parents.push(i);
+        }
+
+        self.len += n - 1;
+    }
+
+    fn clear(&mut self) {
+        self.elements = Vec::with_capacity(0);
+        self.parents = Vec::with_capacity(0);
+        self.len = 0;
     }
 
     fn union(&mut self, p: usize, q: usize) {
@@ -56,7 +66,7 @@ impl UnionFind for QuickFind {
     }
 
     fn find_leader(&self, p: usize) -> usize {
-        return self.parents[p];
+        self.parents[p]
     }
 
     fn connected(&self, p: usize, q: usize) -> bool {

@@ -1,8 +1,10 @@
 use super::UnionFind;
 
+#[derive(Debug)]
 pub struct QuickUnion {
     elements: Vec<usize>,
     parents: Vec<usize>,
+    len: usize,
 }
 
 impl UnionFind for QuickUnion {
@@ -15,7 +17,11 @@ impl UnionFind for QuickUnion {
             parents.push(i);
         }
 
-        QuickUnion { elements, parents }
+        QuickUnion {
+            elements,
+            parents,
+            len: n,
+        }
     }
 
     fn extend(&mut self, n: usize) {
@@ -26,8 +32,18 @@ impl UnionFind for QuickUnion {
             0
         };
 
-        self.elements.extend(max..max + n);
-        self.parents.extend(max..max + n);
+        for i in max..max + n {
+            self.elements.push(i);
+            self.parents.push(i);
+        }
+
+        self.len += n - 1;
+    }
+
+    fn clear(&mut self) {
+        self.elements = Vec::with_capacity(0);
+        self.parents = Vec::with_capacity(0);
+        self.len = 0;
     }
 
     fn union(&mut self, p: usize, q: usize) {
@@ -50,7 +66,7 @@ impl UnionFind for QuickUnion {
             parent = self.parents[element];
         }
 
-        return element;
+        element
     }
 
     fn connected(&self, p: usize, q: usize) -> bool {
@@ -63,7 +79,7 @@ impl UnionFind for QuickUnion {
         }
 
         let mut new_parent = self.find_leader(p);
-        self.parents[p] = q;
+        self.parents[p] = self.find_leader(q);
 
         for element in 0..self.count() {
             if self.parents[element] == p {
@@ -76,6 +92,6 @@ impl UnionFind for QuickUnion {
     }
 
     fn count(&self) -> usize {
-        return self.elements.len();
+        self.len
     }
 }
