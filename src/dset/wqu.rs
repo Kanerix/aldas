@@ -5,6 +5,7 @@ pub struct WeightedQuickUnion {
     elements: Vec<usize>,
     leaders: Vec<usize>,
     ranks: Vec<usize>,
+    children: Vec<usize>,
     len: usize,
 }
 
@@ -13,17 +14,20 @@ impl UnionFind for WeightedQuickUnion {
         let mut elements = Vec::with_capacity(n);
         let mut leaders = Vec::with_capacity(n);
         let mut ranks = Vec::with_capacity(n);
+        let mut children = Vec::with_capacity(n);
 
         for i in 0..n {
             elements.push(i);
             leaders.push(i);
             ranks.push(0);
+            children.push(0);
         }
 
         WeightedQuickUnion {
             elements,
             leaders,
             ranks,
+            children,
             len: n,
         }
     }
@@ -63,9 +67,15 @@ impl UnionFind for WeightedQuickUnion {
         if self.ranks[q_leader] > self.ranks[p_leader] {
             self.leaders[p_leader] = q_leader;
             self.ranks[q_leader] += 1;
+
+            let cur_children = self.children[p_leader];
+            self.children[q_leader] += cur_children + 1;
         } else {
             self.leaders[q_leader] = p_leader;
             self.ranks[p_leader] += 1;
+
+            let cur_children = self.children[q_leader];
+            self.children[p_leader] += cur_children + 1;
         }
     }
 
@@ -106,5 +116,12 @@ impl UnionFind for WeightedQuickUnion {
 
     fn count(&self) -> usize {
         self.len
+    }
+}
+
+impl WeightedQuickUnion {
+    fn size_of(&self, p: usize) -> usize {
+        let p_leader = self.find_leader(p);
+        self.children[p_leader] + 1
     }
 }
