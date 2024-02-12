@@ -3,4 +3,5 @@
 #![allow(unused_variables)]
 #![allow(unreachable_code)]
 
+pub mod balance;
 pub mod dset;
