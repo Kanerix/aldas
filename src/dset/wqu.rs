@@ -44,6 +44,7 @@ impl UnionFind for WeightedQuickUnion {
             self.elements.push(i);
             self.leaders.push(i);
             self.ranks.push(0);
+            self.children.push(0);
         }
 
         self.len += n - 1;
@@ -95,21 +96,26 @@ impl UnionFind for WeightedQuickUnion {
         self.find_leader(p) == self.find_leader(q)
     }
 
-    // Wrong implementation. This works, but fucks up the rank.
     fn move_to(&mut self, p: usize, q: usize) {
         if self.connected(p, q) {
             return;
         }
 
         let mut new_leader = self.find_leader(p);
-        self.leaders[p] = self.find_leader(q);
 
+        self.leaders[p] = self.find_leader(q);
+        self.children[p] = 0;
+
+        // Rank is breaking here
         for element in 0..self.count() {
             if self.leaders[element] == p {
                 if new_leader == p {
-                    new_leader = element
+                    new_leader = element;
+                    self.ranks[element] += 1;
+                    self.leaders[element] = new_leader;
+                } else {
+                    self.leaders[element] = new_leader;
                 }
-                self.leaders[element] = new_leader;
             }
         }
     }
