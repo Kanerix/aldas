@@ -19,26 +19,33 @@
 //!
 //! Hyperfine benchmark results.
 //!
+//! ```
 //! Benchmark 1: cargo test dset::tests::test_qf
 //!  Time (mean ± σ):      4.615 s ±  0.229 s    [User: 4.534 s, System: 0.028 s]
 //!  Range (min … max):    4.536 s …  5.267 s    10 runs
+//! ```
 //!
+//! ```
 //! Benchmark 2: cargo test dset::tests::test_qu
 //!  Time (mean ± σ):     713.7 ms ±   2.0 ms    [User: 697.2 ms, System: 8.3 ms]
 //!  Range (min … max):   711.6 ms … 718.1 ms    10 runs
+//! ```
 //!
+//! ```
 //! Benchmark 3: cargo test dset::tests::test_wqu
 //!  Time (mean ± σ):     614.9 ms ±   1.6 ms    [User: 599.0 ms, System: 8.2 ms]
 //!  Range (min … max):   613.2 ms … 618.5 ms    10 runs
+//! ```
 //!
+//! ```
 //! cargo test dset::tests::test_wqu ran
 //!  1.16 ± 0.00 times faster than cargo test dset::tests::test_qu
 //!  7.51 ± 0.37 times faster than cargo test dset::tests::test_qf
+//! ```
 
 pub mod qf;
 pub mod qu;
 pub mod wqu;
-// pub mod wqu_ptr;
 
 /// A trait containing methods to create an union find for a set.
 ///
@@ -58,7 +65,7 @@ pub(crate) trait UnionFind {
     fn clear(&mut self);
     /// Connects two sets into one disjoined set. Also called a union of two sets.
     ///
-    /// If `p` is a part of `q`'s set already (`p` ∈ `q`), this does nothing.
+    /// If `p` is a part of `Q` already (`p` ∈ `Q`), this does nothing.
     ///
     /// Math: `P` ⋃ `Q` = `S`
     fn union(&mut self, p: usize, q: usize);
