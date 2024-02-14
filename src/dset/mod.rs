@@ -50,7 +50,7 @@ pub mod wqu;
 /// A trait containing methods to create an union find for a set.
 ///
 /// A list of elements connected is called an component.
-pub(crate) trait UnionFind {
+pub trait UnionFind {
     /// Returns a new set with elements from 0 up to `n` (`{0..n-1}`).
     ///
     /// No elements are connected, when the set is first created.
@@ -120,7 +120,7 @@ mod tests {
 
             let first_line = lines.next().unwrap().split(' ').collect::<Vec<&str>>();
             let n: usize = first_line[0].parse().unwrap();
-            let m: usize = first_line[1].parse().unwrap();
+            let _: usize = first_line[1].parse().unwrap();
 
             union_find.extend(n);
 

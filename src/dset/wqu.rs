@@ -126,7 +126,7 @@ impl UnionFind for WeightedQuickUnion {
 }
 
 impl WeightedQuickUnion {
-    fn size_of(&self, p: usize) -> usize {
+    pub fn size_of(&self, p: usize) -> usize {
         let p_leader = self.find_leader(p);
         self.children[p_leader] + 1
     }

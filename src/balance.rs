@@ -1,7 +1,4 @@
-use std::{
-    collections::VecDeque,
-    io::{BufReader, Read},
-};
+use std::io::{BufReader, Read};
 
 pub fn main() {
     let stdin = std::io::stdin();
