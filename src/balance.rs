@@ -1,16 +1,20 @@
-use std::io::{BufReader, Read};
+use std::io::{BufReader, BufWriter, Read, Write};
 
 pub fn main() {
-    let stdin = std::io::stdin();
-    let mut reader = BufReader::new(stdin);
+    let stdin = std::io::stdin().lock();
+    let stdout = std::io::stdout().lock();
+
+    let mut input = BufReader::new(stdin);
+    let mut output = BufWriter::new(stdout);
+
     let mut buf = Vec::new();
-    reader.read_to_end(&mut buf).unwrap();
+    input.read_to_end(&mut buf).unwrap();
 
     let mut stack = Vec::with_capacity(buf.len());
     let mut balanced = false;
 
-    for c in buf.iter() {
-        match c {
+    for b in buf.iter() {
+        match b {
             40 => stack.push(40),
             91 => stack.push(91),
             41 => {
@@ -42,8 +46,8 @@ pub fn main() {
     }
 
     if balanced {
-        println!("1");
+        write!(output, "1\n").ok();
     } else {
-        println!("0");
+        write!(output, "0\n").ok();
     }
 }
