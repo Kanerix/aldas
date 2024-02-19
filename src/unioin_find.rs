@@ -27,14 +27,11 @@ fn connected(leaders: &mut [usize], p: usize, q: usize) -> bool {
 }
 
 pub fn union_find() {
-    let stdin = io::stdin();
-    let stdout = io::stdout();
+    let stdin = io::stdin().lock();
+    let stdout = io::stdout().lock();
 
-    let stdin_handle = stdin.lock();
-    let stdout_handle = stdout.lock();
-
-    let mut output = BufWriter::new(stdout_handle);
-    let mut lines = stdin_handle.lines();
+    let mut output = BufWriter::new(stdout);
+    let mut lines = stdin.lines();
 
     let first_line = lines.next().unwrap().unwrap();
     let args: Vec<&str> = first_line.split(' ').collect();
@@ -71,7 +68,5 @@ pub fn union_find() {
             }
             _ => unreachable!(),
         }
-
-        let _ = output.flush();
     }
 }
