@@ -24,7 +24,7 @@ impl UnionFind for QuickUnion {
     }
 
     fn clear(&mut self) {
-        self.leaders = Vec::with_capacity(0);
+        self.leaders.clear();
         self.len = 0;
     }
 
