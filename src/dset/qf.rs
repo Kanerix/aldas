@@ -8,59 +8,39 @@ use super::UnionFind;
 /// disjoined set.
 #[derive(Debug)]
 pub struct QuickFind {
-    elements: Vec<usize>,
     leaders: Vec<usize>,
     len: usize,
 }
 
 impl UnionFind for QuickFind {
     fn new(n: usize) -> Self {
-        let mut elements = Vec::with_capacity(n);
-        let mut leaders = Vec::with_capacity(n);
-
-        for i in 0..n {
-            elements.push(i);
-            leaders.push(i);
-        }
-
         QuickFind {
-            elements,
-            leaders,
+            leaders: vec![0; n],
             len: n,
         }
     }
 
     fn extend(&mut self, n: usize) {
         let count = self.count();
-        let max = if count != 0 {
-            self.elements[count - 1]
-        } else {
-            0
-        };
+        let max = if count != 0 { count } else { 0 };
 
-        for i in max..max + n {
-            self.elements.push(i);
-            self.leaders.push(i);
-        }
-
+        self.leaders.extend(max..max + n);
         self.len += n - 1;
     }
 
     fn clear(&mut self) {
-        self.elements = Vec::with_capacity(0);
-        self.leaders = Vec::with_capacity(0);
+        self.leaders.clear();
         self.len = 0;
     }
 
     fn union(&mut self, p: usize, q: usize) {
-        let p_leader = self.leaders[p];
-        let q_leader = self.leaders[q];
+        if let Some((p_leader, q_leader)) = self.find_leaders(p, q) {
+            for e in 0..self.count() {
+                let e_leader = self.leaders[e];
 
-        for element in self.elements.iter() {
-            let element_leader = self.leaders[*element];
-
-            if element_leader == p_leader {
-                self.leaders[*element] = q_leader
+                if e_leader == p_leader {
+                    self.leaders[e] = q_leader
+                }
             }
         }
     }
@@ -73,20 +53,29 @@ impl UnionFind for QuickFind {
         self.find_leader(p) == self.find_leader(q)
     }
 
-    fn move_to(&mut self, p: usize, q: usize) {
-        if self.connected(p, q) {
-            return;
+    fn find_leaders(&self, p: usize, q: usize) -> Option<(usize, usize)> {
+        let p_leader = self.find_leader(p);
+        let q_leader = self.find_leader(q);
+
+        if p_leader == q_leader {
+            None
+        } else {
+            Some((p_leader, q_leader))
         }
+    }
 
-        let mut new_leader = self.find_leader(p);
-        self.leaders[p] = self.find_leader(q);
+    fn move_to(&mut self, p: usize, q: usize) {
+        if let Some((p_leader, q_leader)) = self.find_leaders(p, q) {
+            let mut new_leader = p_leader;
+            self.leaders[p] = q_leader;
 
-        for element in 0..self.count() {
-            if self.leaders[element] == p {
-                if new_leader == p {
-                    new_leader = element
+            for e in 0..self.count() {
+                if self.leaders[e] == p {
+                    if new_leader == p {
+                        new_leader = e
+                    }
+                    self.leaders[e] = new_leader;
                 }
-                self.leaders[element] = new_leader;
             }
         }
     }

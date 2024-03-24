@@ -2,86 +2,49 @@ use super::UnionFind;
 
 #[derive(Debug)]
 pub struct WeightedQuickUnion {
-    elements: Vec<usize>,
     leaders: Vec<usize>,
     ranks: Vec<usize>,
-    children: Vec<usize>,
     len: usize,
 }
 
 impl UnionFind for WeightedQuickUnion {
     fn new(n: usize) -> Self {
-        let mut elements = Vec::with_capacity(n);
-        let mut leaders = Vec::with_capacity(n);
-        let mut ranks = Vec::with_capacity(n);
-        let mut children = Vec::with_capacity(n);
-
-        for i in 0..n {
-            elements.push(i);
-            leaders.push(i);
-            ranks.push(0);
-            children.push(0);
-        }
-
         WeightedQuickUnion {
-            elements,
-            leaders,
-            ranks,
-            children,
+            leaders: (0..n).collect(),
+            ranks: vec![0; n],
             len: n,
         }
     }
 
     fn extend(&mut self, n: usize) {
         let count = self.count();
-        let max = if count != 0 {
-            self.elements[count - 1]
-        } else {
-            0
-        };
+        let max = if count != 0 { count - 1 } else { 0 };
 
-        for i in max..max + n {
-            self.elements.push(i);
-            self.leaders.push(i);
-            self.ranks.push(0);
-            self.children.push(0);
-        }
-
+        self.leaders.extend(max..max + n);
+        self.ranks.extend(vec![0; n]);
         self.len += n - 1;
     }
 
     fn clear(&mut self) {
-        self.elements = Vec::with_capacity(0);
-        self.leaders = Vec::with_capacity(0);
-        self.ranks = Vec::with_capacity(0);
+        self.leaders.clear();
+        self.ranks.clear();
         self.len = 0;
     }
 
     fn union(&mut self, p: usize, q: usize) {
-        let p_leader = self.find_leader(p);
-        let q_leader = self.find_leader(q);
-
-        if self.connected(p_leader, q_leader) {
-            return;
-        }
-
-        if self.ranks[q_leader] > self.ranks[p_leader] {
-            self.leaders[p_leader] = q_leader;
-            self.ranks[q_leader] += 1;
-
-            let cur_children = self.children[p_leader];
-            self.children[q_leader] += cur_children + 1;
-        } else {
-            self.leaders[q_leader] = p_leader;
-            self.ranks[p_leader] += 1;
-
-            let cur_children = self.children[q_leader];
-            self.children[p_leader] += cur_children + 1;
+        if let Some((p_leader, q_leader)) = self.find_leaders(p, q) {
+            if self.ranks[q_leader] > self.ranks[p_leader] {
+                self.leaders[p_leader] = q_leader;
+                self.ranks[q_leader] += 1;
+            } else {
+                self.leaders[q_leader] = p_leader;
+                self.ranks[p_leader] += 1;
+            }
         }
     }
 
     fn find_leader(&self, p: usize) -> usize {
-        let mut element = self.elements[p];
+        let mut element = p;
         let mut leader = self.leaders[p];
 
         while element != leader {
@@ -96,25 +59,32 @@ impl UnionFind for WeightedQuickUnion {
         self.find_leader(p) == self.find_leader(q)
     }
 
-    fn move_to(&mut self, p: usize, q: usize) {
-        if self.connected(p, q) {
-            return;
+    fn find_leaders(&self, p: usize, q: usize) -> Option<(usize, usize)> {
+        let p_leader = self.find_leader(p);
+        let q_leader = self.find_leader(q);
+
+        if p_leader == q_leader {
+            None
+        } else {
+            Some((p_leader, q_leader))
         }
+    }
 
-        let mut new_leader = self.find_leader(p);
+    fn move_to(&mut self, p: usize, q: usize) {
+        if let Some((p_leader, q_leader)) = self.find_leaders(p, q) {
+            let mut new_leader = p_leader;
+            self.leaders[p] = q_leader;
 
-        self.leaders[p] = self.find_leader(q);
-        self.children[p] = 0;
-
-        // Rank is breaking here
-        for element in 0..self.count() {
-            if self.leaders[element] == p {
-                if new_leader == p {
-                    new_leader = element;
-                    self.ranks[element] += 1;
-                    self.leaders[element] = new_leader;
-                } else {
-                    self.leaders[element] = new_leader;
+            // Rank is breaking here. Should be fixed.
+            for element in 0..self.count() {
+                if self.leaders[element] == p {
+                    if new_leader == p {
+                        new_leader = element;
+                        self.ranks[element] += 1;
+                        self.leaders[element] = new_leader;
+                    } else {
+                        self.leaders[element] = new_leader;
+                    }
                 }
             }
         }
@@ -122,12 +92,5 @@ impl UnionFind for WeightedQuickUnion {
 
     fn count(&self) -> usize {
         self.len
-    }
-}
-
-impl WeightedQuickUnion {
-    pub fn size_of(&self, p: usize) -> usize {
-        let p_leader = self.find_leader(p);
-        self.children[p_leader] + 1
     }
 }

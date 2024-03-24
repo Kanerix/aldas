@@ -75,6 +75,10 @@ pub trait UnionFind {
     ///
     /// Returns `true` if `p` is a part of `Q` (`p` ∈ `Q`).
     fn connected(&self, p: usize, q: usize) -> bool;
+    /// Get a pair of leaders that are not connected.
+    ///
+    /// Returns `None` if elements are connected.
+    fn find_leaders(&self, p: usize, q: usize) -> Option<(usize, usize)>;
     /// Moves an element from `p`'s set to `q`'s set.
     fn move_to(&mut self, p: usize, q: usize);
     /// Returns a count of elements in the set.
