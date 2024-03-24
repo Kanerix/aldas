@@ -43,45 +43,55 @@ impl UnionFind {
 }
 
 pub fn union_find() {
+    let mut stdin = io::stdin().lock();
+
     let mut first_line = String::new();
-    io::stdin().read_line(&mut first_line).unwrap();
+    stdin.read_line(&mut first_line).unwrap();
+
     let args: Vec<&str> = first_line.trim().split(' ').collect();
     let m: usize = args[1].parse().unwrap();
     let n: usize = args[0].parse().unwrap();
 
     let set = Arc::new(Mutex::new(UnionFind::new(n)));
+
+    let lines_buf: Vec<String> = stdin.lines().map(|line| line.unwrap()).collect();
+    let lines = Arc::new(Mutex::new(lines_buf));
+
+    let elements_pet_iter = 30000 as usize;
+    let threads = f32::ceil(m as f32 / elements_pet_iter as f32) as usize;
     let mut handles = Vec::with_capacity(m);
 
-    for _ in 0..f32::ceil(m as f32 / 1000.) as usize {
+    for _ in 0..threads {
         let set = Arc::clone(&set);
+        let lines = Arc::clone(&lines);
 
         handles.push(std::thread::spawn(move || {
-            let handle = io::stdin().lock();
-            let lines: Vec<String> = handle
-                .lines()
-                .take(1000)
-                .map(|line| line.unwrap())
-                .collect();
+            let mut set_guard = set.lock().unwrap();
+            let mut lines_guard = lines.lock().unwrap();
+
+            let lines = if lines_guard.len() > elements_pet_iter {
+                lines_guard.drain(..elements_pet_iter)
+            } else {
+                lines_guard.drain(..)
+            };
 
             for line in lines {
                 let args: Vec<&str> = line.split(' ').collect();
 
-                let operation: &str;
+                let op: &str;
                 let s: usize;
                 let t: usize;
 
                 match args[0..3] {
-                    [op, val1, val2] => {
-                        operation = op;
-                        s = val1.parse().unwrap();
-                        t = val2.parse().unwrap();
+                    [op_val, s_val, t_val] => {
+                        op = op_val;
+                        s = s_val.parse().unwrap();
+                        t = t_val.parse().unwrap();
                     }
                     _ => panic!("Invalid input format"),
                 }
 
-                let mut set_guard = set.lock().unwrap();
-
-                match operation {
+                match op {
                     "=" => set_guard.union(s, t),
                     "?" => {
                         let mut stdout = io::stdout().lock();
