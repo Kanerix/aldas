@@ -1,9 +1,5 @@
 def opposite_color(color):
-    if color == 1:
-        return 0
-    else:
-        return 1
-
+    return 0 if color == 1 else 1
 
 def is_harmonious_2_coloring(graph):
     num_vertices = len(graph)
@@ -18,7 +14,7 @@ def is_harmonious_2_coloring(graph):
             if colors[neighbor] == color and edge == 1:
                 return "0"
 
-            if colors[neighbor] != color and edge == 0:
+            if colors[neighbor] == opposite_color(color) and edge == 0:
                 return "0"
 
             if colors[neighbor] == -1:
